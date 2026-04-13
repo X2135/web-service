@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Habit & Productivity Analytics Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Habit & Productivity Analytics Dashboard</h1>
+        <p class="subtitle">
+          A data-driven dashboard built on a Kaggle habit tracking dataset
+        </p>
+        <p class="stack-note">FastAPI + SQLite + JWT API Demo Frontend</p>
+      </div>
+      <div class="status-box">
+        <span class="label">Backend</span>
+        <span id="backendUrl" class="value">http://127.0.0.1:8000</span>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section class="kpi-strip">
+      <article class="kpi-card">
+        <p>Total Categories</p>
+        <h3 id="kpiCategories">0</h3>
+      </article>
+      <article class="kpi-card">
+        <p>Total Records (loaded)</p>
+        <h3 id="kpiRecords">0</h3>
+      </article>
+      <article class="kpi-card">
+        <p>Auth Session</p>
+        <h3 id="kpiAuth">Guest</h3>
+      </article>
+      <article class="kpi-card">
+        <p>Environment</p>
+        <h3>Local Demo</h3>
+      </article>
+    </section>
+
+    <main class="dashboard-grid">
+      <section class="panel left-column">
+        <h2>Authentication</h2>
+        <form id="loginForm" class="form-grid">
+          <label>
+            Username
+            <input id="username" type="text" placeholder="demo" required />
+          </label>
+          <label>
+            Password
+            <input id="password" type="password" placeholder="demo123" required />
+          </label>
+          <button type="submit">Login</button>
+        </form>
+        <div id="loginStatus" class="status-message neutral">Not logged in</div>
+
+        <h2>Create Category</h2>
+        <form id="categoryForm" class="form-grid">
+          <label>
+            Category Name
+            <input id="categoryName" type="text" placeholder="e.g. Fitness" required />
+          </label>
+          <label>
+            Description
+            <input id="categoryDescription" type="text" placeholder="Short description" />
+          </label>
+          <button type="submit">Create Category</button>
+        </form>
+
+        <h2>Create Record</h2>
+        <form id="recordForm" class="form-grid">
+          <label>
+            Record Date
+            <input id="recordDate" type="date" required />
+          </label>
+          <label>
+            Habit Name
+            <input id="habitName" type="text" placeholder="e.g. Workout" required />
+          </label>
+          <label>
+            Category ID
+            <input id="categoryId" type="number" min="1" required />
+          </label>
+          <label>
+            Completed
+            <select id="completed" required>
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </label>
+          <label>
+            Duration (minutes)
+            <input id="durationMinutes" type="number" min="0" placeholder="Optional" />
+          </label>
+          <label>
+            Notes
+            <input id="recordNotes" type="text" placeholder="Optional notes" />
+          </label>
+          <button type="submit">Create Record</button>
+        </form>
+      </section>
+
+      <section class="panel center-column">
+        <div class="section-header">
+          <h2>Categories <span id="categoryCount" class="badge">0</span></h2>
+          <button id="refreshCategories" class="secondary">Refresh</button>
+        </div>
+        <div id="categoriesList" class="list-container"></div>
+
+        <div class="section-header">
+          <h2>Records <span id="recordCount" class="badge">0</span></h2>
+          <button id="refreshRecords" class="secondary">Refresh</button>
+        </div>
+        <div id="recordsList" class="list-container records"></div>
+      </section>
+
+      <section class="panel right-column">
+        <div class="section-header">
+          <h2>Analytics Summary</h2>
+          <button id="refreshSummary" class="secondary">Refresh</button>
+        </div>
+        <div id="summaryCards" class="summary-grid"></div>
+
+        <h2>API Response / Debug Panel</h2>
+        <pre id="debugPanel" class="debug-panel">No requests yet.</pre>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

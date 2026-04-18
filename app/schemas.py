@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HabitCategoryBase(BaseModel):
@@ -12,11 +12,14 @@ class HabitCategoryCreate(HabitCategoryBase):
     pass
 
 
+class HabitCategoryUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = None
+
+
 class HabitCategory(HabitCategoryBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HabitRecordBase(BaseModel):
@@ -32,11 +35,18 @@ class HabitRecordCreate(HabitRecordBase):
     pass
 
 
+class HabitRecordUpdate(BaseModel):
+    record_date: date | None = None
+    habit_name: str | None = Field(default=None, min_length=1, max_length=100)
+    category_id: int | None = Field(default=None, gt=0)
+    completed: bool | None = None
+    duration_minutes: int | None = Field(default=None, ge=0)
+    notes: str | None = None
+
+
 class HabitRecord(HabitRecordBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoginRequest(BaseModel):
@@ -47,3 +57,7 @@ class LoginRequest(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class MessageResponse(BaseModel):
+    detail: str

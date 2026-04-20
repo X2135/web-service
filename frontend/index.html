@@ -7,184 +7,87 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="hero">
-      <div class="hero-left">
-        <h1>Habit & Productivity Analytics Dashboard</h1>
-        <p class="subtitle">A data-driven dashboard built on a Kaggle habit dataset</p>
-        <div class="tech-badges">
-          <span class="tech">FastAPI</span>
-          <span class="tech">SQLite</span>
-          <span class="tech">SQLAlchemy</span>
-          <span class="tech">JWT</span>
-          <span class="tech">Kaggle Dataset</span>
+    <div class="dashboard">
+      <header class="hero">
+        <div class="hero-left">
+          <h1>Habit & Productivity Analytics Dashboard</h1>
+          <p class="subtitle">Presentation view of API value and business outcomes</p>
         </div>
-      </div>
 
-      <div class="hero-right">
-        <div class="status-line">
-          <span class="label">API Status</span>
-          <span id="apiStatus" class="pill warning">Checking...</span>
-        </div>
-        <div class="status-line">
-          <span class="label">Login Status</span>
-          <span id="authStatus" class="pill neutral">Not logged in</span>
-        </div>
-        <div class="status-line">
-          <span class="label">Base URL</span>
-          <span id="backendUrl" class="mono">http://127.0.0.1:8000</span>
-        </div>
-      </div>
-    </header>
-
-    <div id="globalMessage" class="global-message hidden"></div>
-
-    <section class="summary-grid">
-      <article class="summary-card">
-        <p>Total Records</p>
-        <h3 id="totalRecords">0</h3>
-      </article>
-      <article class="summary-card">
-        <p>Completed Records</p>
-        <h3 id="completedRecords">0</h3>
-      </article>
-      <article class="summary-card">
-        <p>Completion Rate</p>
-        <h3 id="summaryRate">0%</h3>
-      </article>
-      <article class="summary-card">
-        <p>Average Duration</p>
-        <h3 id="summaryAverage">0 min</h3>
-      </article>
-    </section>
-
-    <main class="layout">
-      <section class="card">
-        <div class="card-header">
-          <h2>Login</h2>
-        </div>
-        <form id="loginForm" class="form-grid">
-          <label>Username <input id="username" type="text" placeholder="demo" required /></label>
-          <label>Password <input id="password" type="password" placeholder="demo123" required /></label>
-          <div class="inline-actions">
-            <button type="submit">Login</button>
-            <button type="button" id="logoutBtn" class="secondary">Logout</button>
+        <div class="hero-right">
+          <div class="status-line">
+            <span class="label">API Status</span>
+            <span id="apiStatus" class="pill warning">Checking...</span>
           </div>
-        </form>
-        <p id="loginStatus" class="status-text">Not logged in</p>
-      </section>
-
-      <section class="card">
-        <div class="card-header">
-          <h2>Categories <span id="categoryCount" class="badge">0</span></h2>
-          <button id="refreshCategories" class="secondary">Refresh</button>
-        </div>
-        <div id="categoriesList" class="list-box"></div>
-
-        <form id="categoryForm" class="form-grid compact-top">
-          <h3>Create Category</h3>
-          <label>Name <input id="categoryName" type="text" placeholder="Learning" required /></label>
-          <label>Description <input id="categoryDescription" type="text" placeholder="Reading habits" /></label>
-          <button type="submit">Create Category</button>
-        </form>
-
-        <form id="findCategoryForm" class="form-grid compact-top">
-          <h3>Find Category by ID</h3>
-          <div class="inline-actions">
-            <input id="findCategoryId" type="number" min="1" placeholder="Category ID" required />
-            <button type="submit" class="secondary">Find</button>
+          <div class="status-line">
+            <span class="label">Login Status</span>
+            <span id="authStatus" class="pill neutral">Not logged in</span>
           </div>
-        </form>
-      </section>
-
-      <section class="card wide">
-        <div class="card-header">
-          <h2>Records <span id="recordCount" class="badge">0</span></h2>
-          <button id="refreshRecords" class="secondary">Refresh</button>
-        </div>
-        <div class="table-wrap">
-          <table id="recordsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Habit</th>
-                <th>Category</th>
-                <th>Completed</th>
-                <th>Duration</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody id="recordsBody"></tbody>
-          </table>
-        </div>
-
-        <form id="recordForm" class="form-grid compact-top">
-          <h3>Create Record</h3>
-          <div class="grid-two">
-            <label>Date <input id="recordDate" type="date" required /></label>
-            <label>Habit Name <input id="habitName" type="text" placeholder="Reading" required /></label>
-            <label>Category ID <input id="categoryId" type="number" min="1" required /></label>
-            <label>Completed
-              <select id="completed" required>
-                <option value="true">True</option>
-                <option value="false">False</option>
-              </select>
-            </label>
-            <label>Duration Minutes <input id="durationMinutes" type="number" min="0" placeholder="30" /></label>
-            <label>Notes <input id="recordNotes" type="text" placeholder="Optional notes" /></label>
+          <div class="status-line">
+            <span class="label">Base URL</span>
+            <span id="backendUrl" class="mono">http://127.0.0.1:8000</span>
           </div>
-          <button type="submit">Create Record</button>
-        </form>
+        </div>
+      </header>
 
-        <form id="findRecordForm" class="form-grid compact-top">
-          <h3>Find Record by ID</h3>
-          <div class="inline-actions">
-            <input id="findRecordId" type="number" min="1" placeholder="Record ID" required />
-            <button type="submit" class="secondary">Find</button>
+      <div id="globalMessage" class="global-message hidden"></div>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <p>Total Records</p>
+          <h3 id="totalRecords">0</h3>
+        </article>
+        <article class="summary-card">
+          <p>Completed Records</p>
+          <h3 id="completedRecords">0</h3>
+        </article>
+        <article class="summary-card highlight">
+          <p>Completion Rate</p>
+          <h3 id="summaryRate">0%</h3>
+        </article>
+        <article class="summary-card">
+          <p>Average Duration</p>
+          <h3 id="summaryAverage">0 min</h3>
+        </article>
+      </section>
+
+      <main class="main-panels">
+        <section class="card demo-flow">
+          <h2>Demo Flow</h2>
+          <p class="helper-text">Run in order for a full demo in under 30 seconds.</p>
+          <div class="demo-actions">
+            <div class="demo-action-item">
+              <button type="button" id="demoLoginBtn">Login</button>
+              <p>Use demo account to unlock protected write APIs.</p>
+            </div>
+            <div class="demo-action-item">
+              <button type="button" id="createDemoCategoryBtn">Create Demo Category</button>
+              <p>Insert one standard category for presentation flow.</p>
+            </div>
+            <div class="demo-action-item">
+              <button type="button" id="createDemoRecordBtn">Create Demo Record</button>
+              <p>Insert one sample record to drive insight updates.</p>
+            </div>
+            <div class="demo-action-item">
+              <button type="button" id="refreshInsightsBtn" class="secondary">Refresh Insights</button>
+              <p>Reload backend analytics from <code>/analytics/summary</code>.</p>
+            </div>
           </div>
-        </form>
-      </section>
+          <p id="loginStatus" class="status-text">Not logged in</p>
+        </section>
 
-      <section class="card">
-        <div class="card-header">
-          <h2>Analytics Summary</h2>
-          <button id="refreshSummary" class="secondary">Refresh Summary</button>
-        </div>
-        <div class="analytics-box">
-          <div><span>Total Records:</span><strong id="analyticsTotal">0</strong></div>
-          <div><span>Completed:</span><strong id="analyticsCompleted">0</strong></div>
-          <div><span>Completion Rate:</span><strong id="analyticsRate">0%</strong></div>
-          <div><span>Average Duration:</span><strong id="analyticsAverage">0 min</strong></div>
-        </div>
+        <section class="card insights-panel">
+          <h2>Business Insights (from API)</h2>
+          <p class="helper-text">All values come from backend <code>/analytics/summary</code>.</p>
 
-        <div class="card-header compact-top">
-          <h2>Records Per Category</h2>
-        </div>
-        <div id="analyticsCategoryList" class="list-box"></div>
+          <h3>Records Per Category</h3>
+          <div id="analyticsCategoryList" class="compact-list"></div>
 
-        <div class="card-header compact-top">
-          <h2>Daily Trend</h2>
-        </div>
-        <div id="analyticsTrendList" class="list-box"></div>
-
-        <div class="card-header compact-top">
-          <h2>Demo Actions</h2>
-        </div>
-        <div class="demo-actions">
-          <button id="refreshDataBtn" class="secondary">Refresh Data</button>
-          <button id="testProtectedBtn" class="secondary">Test Protected Request</button>
-          <button id="triggerErrorBtn" class="warning">Trigger Error Demo</button>
-          <button id="clearDebugBtn" class="secondary">Clear Debug Panel</button>
-        </div>
-      </section>
-
-      <section class="card full">
-        <div class="card-header">
-          <h2>API Response / Debug Panel</h2>
-        </div>
-        <pre id="debugPanel" class="debug-panel">No requests yet.</pre>
-      </section>
-    </main>
+          <h3>Daily Trend</h3>
+          <div id="analyticsTrendList" class="compact-list"></div>
+        </section>
+      </main>
+    </div>
 
     <script src="script.js"></script>
   </body>

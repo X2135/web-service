@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -16,6 +16,9 @@ class HabitCategory(Base):
 
 class HabitRecord(Base):
     __tablename__ = "habit_records"
+    __table_args__ = (
+        UniqueConstraint("record_date", "habit_name", "category_id", name="uq_habit_record_date_name_category"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     record_date = Column(Date, nullable=False)
@@ -26,3 +29,11 @@ class HabitRecord(Base):
     notes = Column(String, nullable=True)
 
     category = relationship("HabitCategory", back_populates="records")
+
+
+class SeedHistory(Base):
+    __tablename__ = "seed_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    seed_name = Column(String, unique=True, index=True, nullable=False)
+    applied_at = Column(DateTime, nullable=False, server_default=func.now())

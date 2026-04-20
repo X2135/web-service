@@ -4,6 +4,18 @@
 
 For the project *Habit & Productivity Analytics API*, GenAI tools (including ChatGPT and GitHub Copilot) were used as development support tools rather than as substitutes for independent implementation.
 
+### Tools Used and Purpose
+
+- **GitHub Copilot**
+	- Used during coding to speed up implementation through inline code suggestions.
+	- Used to refine existing functions, route handlers, and test code structure.
+	- Used to improve code readability and reduce repetitive boilerplate writing.
+
+- **ChatGPT**
+	- Used for design discussion and option comparison before implementation.
+	- Used for debugging support and error-analysis reasoning when API behavior was unclear.
+	- Used to draft and polish technical writing (README, API documentation, technical report, and declaration text).
+
 ### Why GenAI Was Used
 
 GenAI was used to improve development efficiency in the following areas:
@@ -18,6 +30,7 @@ GenAI-assisted discussion and drafting were applied to:
 - backend design discussion;
 - CRUD and API logic refinement;
 - error handling design;
+- deployment and persistence hardening discussion (environment-based database config and seed strategy);
 - test case planning;
 - documentation writing and formatting.
 
@@ -27,6 +40,8 @@ All key technical decisions were made by me. Specifically:
 - the schema design was defined and finalized by me;
 - the CSV-to-database mapping rules were designed by me;
 - authentication scope and API structure were determined by me;
+- environment variable strategy for database/auth configuration was finalized by me;
+- one-time pre-deploy seed tracking strategy was finalized by me;
 - all generated suggestions were reviewed, tested, and selectively integrated by me;
 - only code that passed validation checks was accepted.
 
@@ -35,7 +50,8 @@ All key technical decisions were made by me. Specifically:
 GenAI-generated suggestions were never accepted without verification. Validation included:
 - automated test execution using pytest (**22 tests passed**);
 - manual API validation through Swagger UI and project scripts;
-- direct checking of endpoint responses against expected behavior.
+- direct checking of endpoint responses against expected behavior;
+- deployment-side endpoint checks against the public demo URL.
 
 ### Academic Integrity Statement
 
@@ -99,7 +115,20 @@ I selected and implemented the final test set in pytest, including CRUD, auth, v
 
 ---
 
-### Example Interaction 5 – Documentation Writing
+### Example Interaction 5 – Deployment and Persistence
+
+**User Prompt:**  
+"How can I avoid repeated reseeding and improve persistence reliability after deployment?"
+
+**AI Response Summary:**  
+The AI suggested environment-driven database configuration, production guardrails for missing DB configuration, and a seed-history based pre-deploy strategy to ensure seed scripts run only once per database lifecycle.
+
+**My Decision / Action:**  
+I implemented and validated the final approach in the project by adding environment-based DB handling, PostgreSQL compatibility for deployment, and a `seed_history`-based pre-deploy seed-once workflow.
+
+---
+
+### Example Interaction 6 – Documentation Writing
 
 **User Prompt:**  
 "Help me structure my technical report and API documentation."
@@ -114,4 +143,4 @@ I finalized document content and formatting myself, revised wording for accuracy
 
 ## 3. Concluding Statement
 
-GenAI significantly improved development speed and drafting efficiency during this project. However, core design decisions, implementation choices, and validation activities remained my responsibility throughout. The final outcome represents human-led development supported by AI assistance, with all final decisions, validation, and submission responsibility retained by the student.
+GenAI significantly improved development speed and drafting efficiency during this project. However, core design decisions, implementation choices, deployment decisions, and validation activities remained my responsibility throughout. The final outcome represents human-led development supported by AI assistance, with all final decisions, validation, and submission responsibility retained by the student.

@@ -175,3 +175,19 @@ def get_analytics_summary(db: Session):
         "records_per_category": records_per_category,
         "daily_trend": daily_trend,
     }
+
+
+def check_seed_applied(db: Session, seed_name: str) -> bool:
+    return db.query(models.SeedHistory).filter(models.SeedHistory.seed_name == seed_name).first() is not None
+
+
+def mark_seed_applied(db: Session, seed_name: str):
+    db_seed = models.SeedHistory(seed_name=seed_name)
+    try:
+        db.add(db_seed)
+        db.commit()
+        db.refresh(db_seed)
+        return db_seed
+    except IntegrityError as exc:
+        db.rollback()
+        raise ValueError(f"Seed '{seed_name}' already exists.") from exc

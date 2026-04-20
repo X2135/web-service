@@ -12,7 +12,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 DEMO_USERNAME = "demo"
 DEMO_PASSWORD = "demo123"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def authenticate_user(username: str, password: str) -> bool:

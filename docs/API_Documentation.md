@@ -2,16 +2,20 @@
 
 ## 1. Project Overview
 
-Habit & Productivity Analytics API is a data-driven REST API developed for coursework demonstration. It manages two core resources, habit categories and habit records, backed by a relational SQLite database through SQLAlchemy. The system includes JWT-based authentication for protected write operations, and an analytics endpoint that returns aggregated summary metrics from persisted records. Initial data is derived from a Kaggle 90-day habit tracker dataset and mapped into structured entities. The API is tested with pytest and integrated with a frontend dashboard that consumes real backend responses.
+Habit & Productivity Analytics API is a data-driven REST API developed for coursework demonstration. It manages two core resources, habit categories and habit records, backed by SQLAlchemy ORM models. The system includes JWT-based authentication for protected write operations, and an analytics endpoint that returns aggregated summary metrics from persisted records. Initial data is derived from a Kaggle 90-day habit tracker dataset and mapped into structured entities. The API is tested with pytest and integrated with a frontend dashboard that consumes real backend responses.
+
+Database configuration is environment-driven: SQLite is used for local development/testing, and PostgreSQL is supported for deployment through `DATABASE_URL`.
 
 ## 2. Base URL
 
-`http://127.0.0.1:8000`
+- Local: `http://127.0.0.1:8000`
+- Deployed demo: `https://web-service-fuhg.onrender.com`
 
 ## 3. Authentication
 
 - **Scheme:** JWT Bearer Token
-- **Login endpoint:** `POST /auth/login`
+- **JSON login endpoint (frontend/manual):** `POST /auth/login`
+- **OAuth2 token endpoint (Swagger Authorize):** `POST /auth/token`
 - **Header format after login:**
 
 ```http
@@ -31,6 +35,7 @@ Authorization: Bearer <token>
   - Read endpoints under `/habits` (`GET` list/detail)
   - `GET /analytics/summary`
   - `POST /auth/login`
+  - `POST /auth/token`
 
 ## 4. Error Handling
 
@@ -52,7 +57,9 @@ Standard error response shape:
 }
 ```
 
-Note: in this implementation, validation errors return **422 Unprocessable Entity** and are normalized by the global validation exception handler to the same `detail` + `code` structure.
+Notes:
+- Validation errors return **422 Unprocessable Entity** and are normalized by the global validation exception handler to the same `detail` + `code` structure.
+- Some domain errors expose specific codes (for example: `CATEGORY_NOT_FOUND`, `RECORD_NOT_FOUND`, `CATEGORY_CONFLICT`, `INVALID_CATEGORY`, `AUTH_INVALID_CREDENTIALS`).
 
 ## 5. Endpoint Documentation
 
@@ -102,6 +109,48 @@ Content-Type: application/json
 - **200 OK** – Login successful.
 - **401 Unauthorized** – Incorrect username or password.
 - **422 Unprocessable Entity** – Invalid request payload format.
+
+---
+
+#### POST /auth/token
+
+**Purpose**  
+OAuth2 password-flow token endpoint used by Swagger UI `Authorize`.
+
+**Authentication**  
+Not required.
+
+**Request Body / Path Parameters / Query Parameters**
+
+- **Request Body** (form data)
+  - `username` (string, required)
+  - `password` (string, required)
+- **Path Parameters:** None
+- **Query Parameters:** None
+
+**Example Request**
+
+```http
+POST /auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=demo&password=demo123
+```
+
+**Example Response**
+
+```json
+{
+  "access_token": "<jwt_token>",
+  "token_type": "bearer"
+}
+```
+
+**Status Codes**
+
+- **200 OK** – Token issued.
+- **401 Unauthorized** – Incorrect username or password.
+- **422 Unprocessable Entity** – Invalid form payload.
 
 ---
 
@@ -677,5 +726,6 @@ GET /analytics/summary
 
 - This API is primarily developed for coursework demonstration and assessment.
 - JWT authentication and analytics aggregation are implemented, but the current system remains demo-scale rather than production-scale.
+- A pre-deploy seed-once mechanism is implemented via `seed_history` tracking to avoid duplicate imports on redeploy.
 - During development, Swagger UI (`/docs`) and ReDoc (`/redoc`) can be used for interactive endpoint inspection.
 - This document is intended to accompany the GitHub repository and support coursework submission and oral demonstration.

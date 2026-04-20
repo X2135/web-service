@@ -11,7 +11,10 @@ def login(payload: LoginRequest):
     if not authenticate_user(payload.username, payload.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password.",
+            detail={
+                "detail": "Incorrect username or password.",
+                "code": "AUTH_INVALID_CREDENTIALS",
+            },
         )
 
     token = create_access_token(data={"sub": payload.username})

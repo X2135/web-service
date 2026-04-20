@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class HabitCategoryBase(BaseModel):
+    # Limit category name length to keep UI rendering and indexing predictable.
     name: str = Field(min_length=1, max_length=100)
     description: str | None = None
 
@@ -23,6 +24,7 @@ class HabitCategory(HabitCategoryBase):
 
 
 class HabitRecordBase(BaseModel):
+    # Allow missing duration for legacy/imported rows, but enforce non-negative values when provided.
     record_date: date
     habit_name: str = Field(min_length=1, max_length=100)
     category_id: int = Field(gt=0)
@@ -61,3 +63,29 @@ class Token(BaseModel):
 
 class MessageResponse(BaseModel):
     detail: str
+
+
+class ErrorResponse(BaseModel):
+    detail: str
+    code: str
+
+
+class CategoryCount(BaseModel):
+    category_id: int
+    category_name: str
+    count: int
+
+
+class DailyTrendPoint(BaseModel):
+    record_date: date
+    total: int
+    completed: int
+
+
+class AnalyticsSummary(BaseModel):
+    total_records: int
+    completed_records: int
+    completion_rate: float
+    average_duration: float
+    records_per_category: list[CategoryCount]
+    daily_trend: list[DailyTrendPoint]

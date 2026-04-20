@@ -1,3 +1,4 @@
+from sqlalchemy import case, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -108,3 +109,69 @@ def delete_habit_record(db: Session, record_id: int):
     db.delete(db_record)
     db.commit()
     return db_record
+
+
+def get_analytics_summary(db: Session):
+    # Run aggregations at the database layer to avoid loading all records into application memory.
+    total_records = db.query(func.count(models.HabitRecord.id)).scalar() or 0
+    completed_records = (
+        db.query(func.count(models.HabitRecord.id))
+        .filter(models.HabitRecord.completed.is_(True))
+        .scalar()
+        or 0
+    )
+
+    avg_duration = db.query(func.avg(models.HabitRecord.duration_minutes)).scalar()
+    average_duration = float(avg_duration or 0.0)
+
+    category_rows = (
+        db.query(
+            models.HabitCategory.id,
+            models.HabitCategory.name,
+            func.count(models.HabitRecord.id),
+        )
+        .outerjoin(models.HabitRecord, models.HabitRecord.category_id == models.HabitCategory.id)
+        .group_by(models.HabitCategory.id, models.HabitCategory.name)
+        .order_by(models.HabitCategory.name.asc())
+        .all()
+    )
+
+    records_per_category = [
+        {
+            "category_id": row[0],
+            "category_name": row[1],
+            "count": row[2],
+        }
+        for row in category_rows
+    ]
+
+    trend_rows = (
+        db.query(
+            models.HabitRecord.record_date,
+            func.count(models.HabitRecord.id),
+            func.sum(case((models.HabitRecord.completed.is_(True), 1), else_=0)),
+        )
+        .group_by(models.HabitRecord.record_date)
+        .order_by(models.HabitRecord.record_date.asc())
+        .all()
+    )
+
+    daily_trend = [
+        {
+            "record_date": row[0],
+            "total": int(row[1] or 0),
+            "completed": int(row[2] or 0),
+        }
+        for row in trend_rows
+    ]
+
+    completion_rate = round((completed_records / total_records) * 100, 2) if total_records else 0.0
+
+    return {
+        "total_records": total_records,
+        "completed_records": completed_records,
+        "completion_rate": completion_rate,
+        "average_duration": round(average_duration, 2),
+        "records_per_category": records_per_category,
+        "daily_trend": daily_trend,
+    }

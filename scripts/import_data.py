@@ -125,8 +125,19 @@ def _build_habit_record(
         sleep_hours=sleep_hours,
     )
 
-    # derive completed based on activity duration
-    completed = duration_minutes > 0
+    # Completion is inferred from multiple signals, not only workout duration.
+    # A day is treated as completed if any of the following is true:
+    # 1) workout duration reaches the effective threshold (>= 20 minutes)
+    # 2) journaling activity is present
+    # 3) reading reaches the threshold (>= 20 minutes)
+    # 4) sleep reaches a basic wellness threshold (>= 7 hours)
+    # This rule keeps behavior explainable while matching the dataset characteristics.
+    completed = bool(
+        duration_minutes >= 20
+        or journaling
+        or reading_minutes >= 20
+        or (sleep_hours is not None and sleep_hours >= 7)
+    )
 
     notes = _build_notes(notes_raw)
 

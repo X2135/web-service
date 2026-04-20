@@ -40,10 +40,6 @@
 
     <section class="summary-grid">
       <article class="summary-card">
-        <p>Total Categories</p>
-        <h3 id="totalCategories">0</h3>
-      </article>
-      <article class="summary-card">
         <p>Total Records</p>
         <h3 id="totalRecords">0</h3>
       </article>
@@ -52,8 +48,12 @@
         <h3 id="completedRecords">0</h3>
       </article>
       <article class="summary-card">
-        <p>Authentication Status</p>
-        <h3 id="summaryAuth">Guest</h3>
+        <p>Completion Rate</p>
+        <h3 id="summaryRate">0%</h3>
+      </article>
+      <article class="summary-card">
+        <p>Average Duration</p>
+        <h3 id="summaryAverage">0 min</h3>
       </article>
     </section>
 
@@ -148,13 +148,24 @@
       <section class="card">
         <div class="card-header">
           <h2>Analytics Summary</h2>
-          <button id="refreshSummary" class="secondary">Recalculate</button>
+          <button id="refreshSummary" class="secondary">Refresh Summary</button>
         </div>
         <div class="analytics-box">
           <div><span>Total Records:</span><strong id="analyticsTotal">0</strong></div>
           <div><span>Completed:</span><strong id="analyticsCompleted">0</strong></div>
           <div><span>Completion Rate:</span><strong id="analyticsRate">0%</strong></div>
+          <div><span>Average Duration:</span><strong id="analyticsAverage">0 min</strong></div>
         </div>
+
+        <div class="card-header compact-top">
+          <h2>Records Per Category</h2>
+        </div>
+        <div id="analyticsCategoryList" class="list-box"></div>
+
+        <div class="card-header compact-top">
+          <h2>Daily Trend</h2>
+        </div>
+        <div id="analyticsTrendList" class="list-box"></div>
 
         <div class="card-header compact-top">
           <h2>Demo Actions</h2>

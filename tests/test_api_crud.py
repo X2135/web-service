@@ -53,7 +53,7 @@ def create_category(name: str = "Learning", description: str = "Reading habits")
         json={"name": name, "description": description},
         headers=auth_headers(),
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     return response.json()
 
 
@@ -70,7 +70,7 @@ def create_record(category_id: int) -> dict:
         },
         headers=auth_headers(),
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     return response.json()
 
 
@@ -102,7 +102,7 @@ def test_create_category_success() -> None:
         headers=auth_headers(),
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()["name"] == "Learning"
 
 
@@ -151,8 +151,8 @@ def test_delete_category_success() -> None:
 
     response = client.delete(f"/habits/categories/{category['id']}", headers=auth_headers())
 
-    assert response.status_code == 200
-    assert response.json()["detail"] == "Category deleted successfully."
+    assert response.status_code == 204
+    assert response.text == ""
 
 
 def test_delete_missing_category_returns_404() -> None:
@@ -177,7 +177,7 @@ def test_create_record_success() -> None:
         headers=auth_headers(),
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()["habit_name"] == "Reading"
 
 
@@ -235,11 +235,95 @@ def test_delete_record_success() -> None:
 
     response = client.delete(f"/habits/records/{record['id']}", headers=auth_headers())
 
-    assert response.status_code == 200
-    assert response.json()["detail"] == "Record deleted successfully."
+    assert response.status_code == 204
+    assert response.text == ""
 
 
 def test_delete_missing_record_returns_404() -> None:
     response = client.delete("/habits/records/999", headers=auth_headers())
 
     assert response.status_code == 404
+
+
+def test_analytics_summary_returns_expected_metrics() -> None:
+    category_a = create_category(name="Fitness")
+    category_b = create_category(name="Wellness")
+
+    client.post(
+        "/habits/records",
+        json={
+            "record_date": "2024-06-01",
+            "habit_name": "Run",
+            "category_id": category_a["id"],
+            "completed": True,
+            "duration_minutes": 30,
+            "notes": "r1",
+        },
+        headers=auth_headers(),
+    )
+    client.post(
+        "/habits/records",
+        json={
+            "record_date": "2024-06-01",
+            "habit_name": "Read",
+            "category_id": category_b["id"],
+            "completed": False,
+            "duration_minutes": 10,
+            "notes": "r2",
+        },
+        headers=auth_headers(),
+    )
+
+    response = client.get("/analytics/summary")
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["total_records"] == 2
+    assert payload["completed_records"] == 1
+    assert payload["completion_rate"] == 50.0
+    assert payload["average_duration"] == 20.0
+    assert "records_per_category" in payload
+    assert "daily_trend" in payload
+    assert len(payload["daily_trend"]) == 1
+
+
+def test_boundary_invalid_duration_returns_422() -> None:
+    category = create_category(name="BoundaryCat")
+    response = client.post(
+        "/habits/records",
+        json={
+            "record_date": "2024-06-01",
+            "habit_name": "Bad Duration",
+            "category_id": category["id"],
+            "completed": True,
+            "duration_minutes": -1,
+            "notes": "invalid",
+        },
+        headers=auth_headers(),
+    )
+
+    assert response.status_code == 422
+    body = response.json()
+    assert "detail" in body
+    assert body["code"] == "VALIDATION_ERROR"
+
+
+def test_boundary_empty_category_name_returns_422() -> None:
+    response = client.post(
+        "/habits/categories",
+        json={"name": "", "description": "invalid"},
+        headers=auth_headers(),
+    )
+
+    assert response.status_code == 422
+    body = response.json()
+    assert "detail" in body
+    assert body["code"] == "VALIDATION_ERROR"
+
+
+def test_not_found_error_has_unified_shape() -> None:
+    response = client.get("/habits/categories/999")
+    assert response.status_code == 404
+    body = response.json()
+    assert body["detail"] == "Category not found."
+    assert body["code"] == "CATEGORY_NOT_FOUND"

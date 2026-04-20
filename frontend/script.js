@@ -5,6 +5,7 @@ const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   categories: [],
   records: [],
+  analytics: null,
   username: "demo",
 };
 
@@ -12,17 +13,20 @@ const elements = {
   backendUrl: document.getElementById("backendUrl"),
   apiStatus: document.getElementById("apiStatus"),
   authStatus: document.getElementById("authStatus"),
-  summaryAuth: document.getElementById("summaryAuth"),
   globalMessage: document.getElementById("globalMessage"),
   debugPanel: document.getElementById("debugPanel"),
   loginStatus: document.getElementById("loginStatus"),
 
-  totalCategories: document.getElementById("totalCategories"),
   totalRecords: document.getElementById("totalRecords"),
   completedRecords: document.getElementById("completedRecords"),
+  summaryRate: document.getElementById("summaryRate"),
+  summaryAverage: document.getElementById("summaryAverage"),
   analyticsTotal: document.getElementById("analyticsTotal"),
   analyticsCompleted: document.getElementById("analyticsCompleted"),
   analyticsRate: document.getElementById("analyticsRate"),
+  analyticsAverage: document.getElementById("analyticsAverage"),
+  analyticsCategoryList: document.getElementById("analyticsCategoryList"),
+  analyticsTrendList: document.getElementById("analyticsTrendList"),
 
   categoryCount: document.getElementById("categoryCount"),
   categoriesList: document.getElementById("categoriesList"),
@@ -60,7 +64,6 @@ function setAuthStatus() {
   const loggedIn = Boolean(state.token);
   elements.authStatus.className = `pill ${loggedIn ? "success" : "neutral"}`;
   elements.authStatus.textContent = loggedIn ? "Logged in" : "Not logged in";
-  elements.summaryAuth.textContent = loggedIn ? "Logged in" : "Guest";
   elements.loginStatus.textContent = loggedIn
     ? `Authenticated session active (${state.username})`
     : "Not logged in";
@@ -134,7 +137,6 @@ function categoryNameById(id) {
 
 function renderCategories() {
   const data = state.categories;
-  elements.totalCategories.textContent = String(data.length);
   elements.categoryCount.textContent = String(data.length);
 
   if (!data.length) {
@@ -156,16 +158,7 @@ function renderCategories() {
 
 function renderRecords() {
   const records = state.records;
-  const completedCount = records.filter((item) => item.completed).length;
-
-  elements.totalRecords.textContent = String(records.length);
-  elements.completedRecords.textContent = String(completedCount);
   elements.recordCount.textContent = String(records.length);
-  elements.analyticsTotal.textContent = String(records.length);
-  elements.analyticsCompleted.textContent = String(completedCount);
-
-  const rate = records.length ? ((completedCount / records.length) * 100).toFixed(1) : "0.0";
-  elements.analyticsRate.textContent = `${rate}%`;
 
   if (!records.length) {
     elements.recordsBody.innerHTML = '<tr><td colspan="7">No records available.</td></tr>';
@@ -201,13 +194,87 @@ async function refreshRecords() {
   renderRecords();
 }
 
-function refreshAnalytics() {
-  renderRecords();
+function renderAnalytics() {
+  const analytics = state.analytics;
+  if (!analytics) {
+    elements.totalRecords.textContent = "0";
+    elements.completedRecords.textContent = "0";
+    elements.summaryRate.textContent = "0%";
+    elements.summaryAverage.textContent = "0 min";
+    elements.analyticsTotal.textContent = "0";
+    elements.analyticsCompleted.textContent = "0";
+    elements.analyticsRate.textContent = "0%";
+    elements.analyticsAverage.textContent = "0 min";
+    elements.analyticsCategoryList.innerHTML = '<p class="meta-line">No category analytics available.</p>';
+    elements.analyticsTrendList.innerHTML = '<p class="meta-line">No daily trend available.</p>';
+    return;
+  }
+
+  const completionRate = Number(analytics.completion_rate || 0);
+  const avgDuration = Number(analytics.average_duration || 0);
+
+  elements.totalRecords.textContent = String(analytics.total_records ?? 0);
+  elements.completedRecords.textContent = String(analytics.completed_records ?? 0);
+  elements.summaryRate.textContent = `${completionRate.toFixed(2)}%`;
+  elements.summaryAverage.textContent = `${avgDuration.toFixed(2)} min`;
+  elements.analyticsTotal.textContent = String(analytics.total_records ?? 0);
+  elements.analyticsCompleted.textContent = String(analytics.completed_records ?? 0);
+  elements.analyticsRate.textContent = `${completionRate.toFixed(2)}%`;
+  elements.analyticsAverage.textContent = `${avgDuration.toFixed(2)} min`;
+
+  const categoryRows = Array.isArray(analytics.records_per_category)
+    ? analytics.records_per_category
+    : [];
+  if (!categoryRows.length) {
+    elements.analyticsCategoryList.innerHTML = '<p class="meta-line">No category analytics available.</p>';
+  } else {
+    elements.analyticsCategoryList.innerHTML = categoryRows
+      .map(
+        (item) => `
+        <div class="item-card">
+          <div class="item-title">${item.category_name}</div>
+          <div class="meta-line">Category ID: ${item.category_id}</div>
+          <div class="meta-line">Records: ${item.count}</div>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  const trendRows = Array.isArray(analytics.daily_trend) ? analytics.daily_trend : [];
+  if (!trendRows.length) {
+    elements.analyticsTrendList.innerHTML = '<p class="meta-line">No daily trend available.</p>';
+  } else {
+    elements.analyticsTrendList.innerHTML = trendRows
+      .map(
+        (item) => `
+        <div class="item-card">
+          <div class="item-title">${item.record_date}</div>
+          <div class="meta-line">Total: ${item.total}</div>
+          <div class="meta-line">Completed: ${item.completed}</div>
+        </div>
+      `
+      )
+      .join("");
+  }
+}
+
+async function refreshAnalytics() {
+  // Read summary metrics directly from the backend aggregation endpoint.
+  // This keeps analytics data-driven and aligned with server-side calculations.
+  try {
+    state.analytics = await apiRequest("/analytics/summary");
+    renderAnalytics();
+  } catch (error) {
+    state.analytics = null;
+    renderAnalytics();
+    showMessage("error", `Analytics summary load failed: ${error.message}`);
+  }
 }
 
 async function refreshAllData() {
   await Promise.all([refreshCategories(), refreshRecords()]);
-  refreshAnalytics();
+  await refreshAnalytics();
 }
 
 async function checkApiHealth() {
@@ -300,7 +367,7 @@ elements.recordForm.addEventListener("submit", async (event) => {
       auth: true,
     });
     elements.recordForm.reset();
-    await refreshRecords();
+    await Promise.all([refreshRecords(), refreshAnalytics()]);
     showMessage("success", "Record created successfully.");
   } catch (error) {
     showMessage("error", `Create record failed: ${error.message}`);
@@ -337,9 +404,11 @@ elements.refreshRecords.addEventListener("click", async () => {
   }
 });
 
-elements.refreshSummary.addEventListener("click", () => {
-  refreshAnalytics();
-  showMessage("success", "Analytics summary recalculated.");
+elements.refreshSummary.addEventListener("click", async () => {
+  await refreshAnalytics();
+  if (state.analytics) {
+    showMessage("success", "Analytics summary refreshed from backend API.");
+  }
 });
 
 elements.refreshDataBtn.addEventListener("click", async () => {

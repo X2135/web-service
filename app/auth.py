@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta, timezone
+import os
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
-SECRET_KEY = "change-this-secret-key-for-coursework"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = os.getenv("SECRET_KEY", "change-this-secret-key-for-coursework")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 DEMO_USERNAME = "demo"
 DEMO_PASSWORD = "demo123"

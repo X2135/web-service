@@ -157,9 +157,14 @@ pytest -q
 
 ## API Overview
 
+### Service Health
+
+- `GET /`
+
 ### Authentication
 
 - `POST /auth/login`
+- `POST /auth/token`
 - `GET /auth/me`
 
 ### Habit Categories
@@ -186,13 +191,18 @@ pytest -q
 
 ## Authentication & Error Handling
 
-- JWT login is provided through `POST /auth/login`
+- JWT login is provided through `POST /auth/login` (JSON) and `POST /auth/token` (OAuth2 password form for Swagger Authorize)
 - Protected endpoints require `Authorization: Bearer <token>`
-- Protected write operations include create/update/delete for categories and records
+- Protected endpoints include `GET /auth/me` and all create/update/delete operations for categories and records
 - API returns consistent status-based error responses, including:
-  - `400` bad request/business rule violations
+  - `400` bad request/business rule violations (for example duplicate category name or invalid category reference)
   - `401` unauthorized/invalid credentials/token
   - `404` resource not found
+  - `422` validation errors (invalid request payload/path/query constraints)
+- Request validation constraints include:
+  - category/habit name length `1..100`
+  - `category_id > 0`
+  - `duration_minutes >= 0` when provided
 - Error payloads follow a consistent structure to simplify frontend handling and debugging
 
 ---

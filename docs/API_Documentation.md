@@ -4,7 +4,7 @@
 
 Habit & Productivity Analytics API is a data-driven REST API developed for coursework demonstration. It manages two core resources, habit categories and habit records, backed by SQLAlchemy ORM models. The system includes JWT-based authentication for protected write operations, and an analytics endpoint that returns aggregated summary metrics from persisted records. Initial data is derived from a Kaggle 90-day habit tracker dataset and mapped into structured entities. The API is tested with pytest and integrated with a frontend dashboard that consumes real backend responses.
 
-Database configuration is environment-driven: SQLite is used for local development/testing, and PostgreSQL is supported for deployment through `DATABASE_URL`.
+Database configuration is environment-driven: SQLite is used for local development/testing, and PostgreSQL is supported for deployment through `DATABASE_URL` (required when running with production environment settings).
 
 ## 2. Base URL
 
@@ -32,6 +32,7 @@ Authorization: Bearer <token>
   - `GET /auth/me`
 
 - **No authentication required:**
+  - `GET /`
   - Read endpoints under `/habits` (`GET` list/detail)
   - `GET /analytics/summary`
   - `POST /auth/login`
@@ -60,8 +61,46 @@ Standard error response shape:
 Notes:
 - Validation errors return **422 Unprocessable Entity** and are normalized by the global validation exception handler to the same `detail` + `code` structure.
 - Some domain errors expose specific codes (for example: `CATEGORY_NOT_FOUND`, `RECORD_NOT_FOUND`, `CATEGORY_CONFLICT`, `INVALID_CATEGORY`, `AUTH_INVALID_CREDENTIALS`).
+- Input constraint highlights implemented in schema validation: category/habit names must be non-empty and max length 100, `category_id` must be `> 0`, and `duration_minutes` must be `>= 0` when provided.
 
 ## 5. Endpoint Documentation
+
+---
+
+### 5.0 Service Health
+
+#### GET /
+
+**Purpose**  
+Return service status message and API version.
+
+**Authentication**  
+Not required.
+
+**Request Body / Path Parameters / Query Parameters**
+
+- **Request Body:** None
+- **Path Parameters:** None
+- **Query Parameters:** None
+
+**Example Request**
+
+```http
+GET /
+```
+
+**Example Response**
+
+```json
+{
+  "message": "Habit and Productivity Analytics API is running",
+  "version": "0.1.0"
+}
+```
+
+**Status Codes**
+
+- **200 OK** – Service is reachable.
 
 ---
 
@@ -288,7 +327,7 @@ Required.
 **Request Body / Path Parameters / Query Parameters**
 
 - **Request Body**
-  - `name` (string, required)
+  - `name` (string, required, length: `1..100`)
   - `description` (string, optional)
 - **Path Parameters:** None
 - **Query Parameters:** None
@@ -319,7 +358,7 @@ Content-Type: application/json
 **Status Codes**
 
 - **201 Created** – Category created.
-- **400 Bad Request** – Duplicate or invalid category data.
+- **400 Bad Request** – Duplicate category name (business conflict).
 - **401 Unauthorized** – Missing or invalid token.
 - **422 Unprocessable Entity** – Invalid request payload format.
 
@@ -336,7 +375,7 @@ Required.
 **Request Body / Path Parameters / Query Parameters**
 
 - **Request Body**
-  - `name` (string, optional)
+  - `name` (string, optional, length: `1..100`)
   - `description` (string, optional)
 - **Path Parameters:**
   - `category_id` (integer, required)
@@ -514,8 +553,8 @@ Required.
 
 - **Request Body**
   - `record_date` (date, required, `YYYY-MM-DD`)
-  - `habit_name` (string, required)
-  - `category_id` (integer, required)
+  - `habit_name` (string, required, length: `1..100`)
+  - `category_id` (integer, required, must be `> 0`)
   - `completed` (boolean, required)
   - `duration_minutes` (integer, optional, must be `>= 0` when provided)
   - `notes` (string, optional)
@@ -574,8 +613,8 @@ Required.
 
 - **Request Body** (all fields optional)
   - `record_date` (date)
-  - `habit_name` (string)
-  - `category_id` (integer)
+  - `habit_name` (string, length: `1..100`)
+  - `category_id` (integer, must be `> 0`)
   - `completed` (boolean)
   - `duration_minutes` (integer, `>= 0`)
   - `notes` (string)
@@ -729,3 +768,4 @@ GET /analytics/summary
 - A pre-deploy seed-once mechanism is implemented via `seed_history` tracking to avoid duplicate imports on redeploy.
 - During development, Swagger UI (`/docs`) and ReDoc (`/redoc`) can be used for interactive endpoint inspection.
 - This document is intended to accompany the GitHub repository and support coursework submission and oral demonstration.
+

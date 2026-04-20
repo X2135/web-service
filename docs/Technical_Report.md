@@ -3,6 +3,12 @@
 ## Project Title
 **Habit & Productivity Analytics API**
 
+## Submission Links
+
+- GitHub Repository: [INSERT GITHUB LINK]
+- API Documentation PDF: [INSERT API DOC LINK]
+- Presentation Slides: To be submitted separately as part of the coursework package.
+
 ## Section 1. Introduction and Project Overview
 
 The Habit & Productivity Analytics API is a data-driven REST API project that demonstrates how raw behavioural data can be transformed into structured, validated, and reusable software services. The project was designed to deliver a **correct, testable, and demonstrable system** rather than only a working prototype. It is based on a 90-day habit tracking dataset containing daily activity information such as workout duration and other productivity-related signals. This dataset was chosen to combine structured values with realistic data quality issues, which improves the validity of data cleaning, transformation, and API-oriented modelling decisions.
@@ -32,9 +38,9 @@ To support safe deployment, the project also includes a seed tracking table (`se
 | Raw Field | Internal Field | Transformation Rule |
 |---|---|---|
 | `Date` | `record_date` | Parsed into ISO date format (`YYYY-MM-DD`); invalid values are skipped. |
-| `Workout_Duration` | `duration_minutes` | Converted to numeric minutes and validated as non-negative when present. |
-| `Journaling` | activity signal | Normalised into a boolean-style signal for rule-based classification. |
-| `Reading_Time` | activity signal | Converted to a numeric indicator and used in rule-based classification. |
+| `Workout_Duration_Min` | `duration_minutes` | Converted to numeric minutes and validated as non-negative when present. |
+| `Journaling (Y/N)` | activity signal | Normalised into a boolean-style signal for rule-based classification. |
+| `Reading_Min` | activity signal | Converted to a numeric indicator and used in rule-based classification. |
 | `Sleep_Hours` | activity signal | Converted to a numeric value and retained as an input signal where available. |
 | activity signals | category | Mapped into categories such as Fitness, Health, or Wellness using explicit rules. |
 | multiple fields | `completed` | Inferred through threshold-based and signal-based decision rules. |
@@ -53,19 +59,19 @@ The frontend dashboard calls `/analytics/summary` during initial load and refres
 
 **Interactive API documentation (Swagger UI)**
 
-![alt text](image.png)
+![Swagger UI](docs/images/swagger-ui.png)
 
 *Figure 1. Interactive API documentation (Swagger UI) used for endpoint-level verification.*
 
 **/analytics/summary response**
 
-![Analytics summary JSON response](<截屏2026-04-20 21.32.35.png>)
+![Analytics summary JSON response](docs/images/analytics-summary.png)
 
 *Figure 2. `/analytics/summary` response returned from the backend aggregation endpoint.*
 
 ## Section 5. Authentication, Error Handling, and Validation
 
-Authentication is implemented using a JWT-based workflow. A client submits credentials to `/auth/login` (JSON client flow) or `/auth/token` (OAuth2 form flow for Swagger Authorize), receives a bearer token, and then includes that token in the `Authorization: Bearer <token>` header for protected requests. In this system, write operations on categories and records (`POST`, `PUT`, and `DELETE`) are protected, while read operations remain open for demonstration and analysis.
+Authentication is implemented using a JWT-based workflow. A client submits credentials to `/auth/login` (JSON client flow) or `/auth/token` (OAuth2 form flow for Swagger Authorize), receives a bearer token, and then includes that token in the `Authorization: Bearer <token>` header for protected requests. In this system, write operations on categories and records (`POST`, `PUT`, and `DELETE`) are protected, while most read operations remain open for demonstration and analysis; the user-context read endpoint `/auth/me` is protected.
 
 This security model was chosen as a trade-off between **implementation complexity** and **demonstrable security**. It provides meaningful access control while keeping scope appropriate for coursework constraints.
 
@@ -79,7 +85,7 @@ Testing was carried out at the API level using Pytest together with FastAPI’s 
 
 > Test Execution Evidence:
 > ```
-> 22 passed in 0.65s
+> 22 passed in 0.84s
 > ```
 
 This output provides reproducible evidence of system correctness.
@@ -90,7 +96,7 @@ Automated tests were complemented by runtime checks through Swagger UI and helpe
 
 **Automated test execution result**
 
-![Pytest terminal output](<截屏2026-04-20 21.34.27.png>)
+![Pytest terminal output](docs/images/pytest-output.png)
 
 *Figure 3. Automated test execution output showing all tests passed.*
 
@@ -120,3 +126,37 @@ GenAI tools were used in a supporting role rather than as a substitute for engin
 All key technical decisions were made by me, including schema design, data mapping rules, authentication scope, API structure, deployment logic, and validation strategy. Generated suggestions were accepted only after code-level and runtime validation.
 
 In this project, GenAI improved speed and clarity, but ownership did not shift. **Final decisions remained under human control**, and final responsibility for correctness, coherence, and submission quality remained with me throughout.
+
+Curated GenAI interaction summaries/logs are included as supplementary submission material (appendix) in line with coursework requirements.
+
+## Section 10. Appendix
+
+This appendix lists supporting materials provided together with the main report for assessment traceability.
+
+### Appendix A. Supplementary GenAI Interaction Summaries
+
+- Curated summaries/logs of selected GenAI-assisted interactions used during implementation and documentation refinement.
+- Included to support transparency, authorship traceability, and alignment with coursework GenAI disclosure requirements.
+
+### Appendix B. Submission Artefacts
+
+- Source code repository (backend, frontend, scripts, tests).
+- API documentation PDF.
+- Technical report (this document).
+- Presentation slides (submitted separately as required).
+
+### Appendix C. Evidence Assets
+
+- Swagger UI verification screenshot.
+- `/analytics/summary` response screenshot.
+- Automated pytest execution screenshot.
+
+## Section 11. References
+
+1. Uthaya, S. (n.d.) *90-Day Habit Tracker for Personal Growth*. Kaggle. Available at: <https://www.kaggle.com/datasets/uthaya1995/90-day-habit-tracker-for-personal-growth> (Accessed: 20 April 2026).
+2. FastAPI (n.d.) *FastAPI Documentation*. Available at: <https://fastapi.tiangolo.com/> (Accessed: 20 April 2026).
+3. SQLAlchemy (n.d.) *SQLAlchemy 2.0 Documentation*. Available at: <https://docs.sqlalchemy.org/> (Accessed: 20 April 2026).
+4. Pydantic (n.d.) *Pydantic Documentation*. Available at: <https://docs.pydantic.dev/> (Accessed: 20 April 2026).
+5. pandas (n.d.) *pandas Documentation*. Available at: <https://pandas.pydata.org/docs/> (Accessed: 20 April 2026).
+6. pytest (n.d.) *pytest Documentation*. Available at: <https://docs.pytest.org/> (Accessed: 20 April 2026).
+7. IETF (2015) *RFC 7519: JSON Web Token (JWT)*. Available at: <https://datatracker.ietf.org/doc/html/rfc7519> (Accessed: 20 April 2026).

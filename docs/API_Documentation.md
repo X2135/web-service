@@ -48,6 +48,7 @@ Common response status codes:
 - **400 Bad Request** – Invalid business input (for example duplicate category, invalid category reference).
 - **401 Unauthorized** – Missing or invalid authentication credentials.
 - **404 Not Found** – Requested resource does not exist.
+- **500 Internal Server Error** – Unexpected server-side failure.
 
 Standard error response shape:
 
@@ -419,6 +420,9 @@ Content-Type: application/json
 **Purpose**  
 Delete a category by ID.
 
+**Important behavior**  
+If records are still linked to the category, delete those records first before deleting the category.
+
 **Authentication**  
 Required.
 
@@ -767,5 +771,6 @@ GET /analytics/summary
 - JWT authentication and analytics aggregation are implemented, but the current system remains demo-scale rather than production-scale.
 - A pre-deploy seed-once mechanism is implemented via `seed_history` tracking to avoid duplicate imports on redeploy.
 - During development, Swagger UI (`/docs`) and ReDoc (`/redoc`) can be used for interactive endpoint inspection.
+- The frontend dashboard demonstration flow uses these key API operations: login, create category, create record, delete record, delete category, and refresh analytics summary.
 - This document is intended to accompany the GitHub repository and support coursework submission and oral demonstration.
 

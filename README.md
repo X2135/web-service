@@ -1,274 +1,239 @@
 # Habit & Productivity Analytics API
 
-A data-driven REST API coursework project built with FastAPI, SQLite, and SQLAlchemy, using a Kaggle 90-day habit tracker dataset as the core data source.  
-The project includes secure CRUD operations, JWT authentication, analytics endpoints, automated tests, and a frontend dashboard that consumes real backend API responses.
+A coursework Web Services API project built with FastAPI. The service provides full CRUD operations for habit categories and habit records, a dedicated analytics endpoint, and JWT-based authentication for protected operations.
 
----
+## 1) Project Overview
 
-## Project Overview
+This API supports habit tracking and productivity analysis with the following core capabilities:
 
-This project demonstrates an end-to-end backend workflow for habit and productivity tracking:
-
-- Build a structured REST API with clear resource models
-- Import and normalize CSV dataset records into a relational database
-- Protect write operations with JWT-based authentication
-- Provide analytics through a dedicated summary endpoint
-- Present results in a browser-based dashboard
-
-The goal is to deliver a professional, explainable, and demo-ready coursework submission.
-
----
-
-## Key Features
-
-- Full CRUD for:
-  - Habit categories
-  - Habit records
+- CRUD for `habit_categories` and `habit_records`
+- Analytics endpoint: `GET /analytics/summary`
 - JWT authentication for protected endpoints
-- CSV-to-SQLite data import pipeline
-- Analytics summary endpoint: `/analytics/summary`
-- Consistent error handling and HTTP status codes
-- Pytest-based API test suite
-- Frontend dashboard (HTML/CSS/JavaScript) connected to real API data
+- Structured validation and unified error response shape
 
----
+## 2) Setup Instructions
 
-## Tech Stack
+Run the following from your terminal step-by-step:
 
-- FastAPI
-- SQLite
-- SQLAlchemy
-- Pydantic
-- Pandas
-- Pytest
-- HTML / CSS / JavaScript
+### Step 1 — Clone repository
 
----
-
-## Dataset
-
-- Source: Kaggle 90-day habit tracker dataset
-- Input files:
-  - `data/habit_data.csv`
-  - `90_day_habit_tracker.csv` (raw reference file)
-- Import script: `scripts/import_data.py`
-
-### Mapping Summary
-
-The import pipeline:
-
-- Reads CSV with Pandas
-- Resolves and validates source columns
-- Parses date and activity-related fields
-- Maps records into:
-  - `habit_categories`
-  - `habit_records`
-- Derives category, habit label, and completion status with explicit rule-based logic
-- Handles duplicate/invalid rows and prints import summary statistics
-
----
-
-## Project Structure
-
-```text
-.
-├── app/
-│   ├── main.py                # FastAPI app entrypoint, router registration, exception handling
-│   ├── database.py            # SQLite engine and DB session management
-│   ├── models.py              # SQLAlchemy ORM models
-│   ├── schemas.py             # Pydantic request/response schemas
-│   ├── crud.py                # Database CRUD logic + analytics aggregation
-│   ├── auth.py                # JWT utilities and auth dependency
-│   └── routes/
-│       ├── auth.py            # /auth endpoints
-│       ├── habits.py          # /habits CRUD endpoints
-│       └── analytics.py       # /analytics/summary endpoint
-├── data/
-│   └── habit_data.csv         # Main dataset used for import
-├── frontend/
-│   ├── index.html             # Dashboard UI
-│   ├── script.js              # API integration and rendering logic
-│   └── style.css              # Dashboard styling
-├── scripts/
-│   ├── import_data.py         # CSV -> SQLite import pipeline
-│   ├── run_api_checks.py      # API behavior check script
-│   └── verify_db.py           # Database verification script
-├── tests/
-│   ├── test_api_crud.py       # API integration tests
-│   └── ...                    # Additional test files
-├── requirements.txt           # Python dependencies
-└── habits.db                  # SQLite database file generated after local data import
+```bash
+git clone <your-repo-url>
+cd <repo-folder>
 ```
 
----
-
-## Setup & Run Instructions
-
-All commands below should be run from the project root directory.
-
-### 1) Create and activate virtual environment
+### Step 2 — Create and activate virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 2) Install dependencies
+### Step 3 — Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3) Import dataset into SQLite
+### Step 4 — (Recommended) import local CSV seed data
 
 ```bash
 python scripts/import_data.py
 ```
 
-### 4) Start FastAPI server
+### Step 5 — Run API server
 
 ```bash
 python -m uvicorn app.main:app --reload
 ```
 
-### 5) Open Swagger UI
+## 3) Run Instructions
 
-- `http://127.0.0.1:8000/docs`
+- API base URL: `http://127.0.0.1:8000`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
 
-### 6) Start frontend dashboard (new terminal)
+## 3.1) Frontend Usage (for Demo and Presentation)
 
-From the project root directory, run:
+This project also includes a lightweight frontend dashboard in `frontend/` for coursework demonstration. It is used to quickly show API health, login status, analytics cards, and demo CRUD actions.
 
-```bash
-python -m http.server 5500
-```
+### Start frontend locally
 
-Then open:
-
-- `http://127.0.0.1:5500/frontend/`
-
-### 7) Run tests
+Open a new terminal from project root and run:
 
 ```bash
-pytest
+python3 -m http.server 5500
 ```
 
----
+Open in browser:
 
-## API Overview
+- `http://127.0.0.1:5500/frontend/?local=1` (connect to local FastAPI)
+- `http://127.0.0.1:5500/frontend/` (connect to deployed backend by default)
 
-### Service Health
+### Frontend quick workflow
 
-- `GET /`
+1. Click **Demo Login** (uses demo account).
+2. Click **Refresh Insights** to fetch `/analytics/summary`.
+3. Click create/delete demo category and record buttons to demonstrate protected CRUD.
 
-### Authentication
+## 4) API Documentation Link
 
-- `POST /auth/login`
-- `POST /auth/token`
+- https://github.com/X2135/web-service/blob/main/docs/API_Documentation.pdf
+
+
+## 5) Deployment Information
+
+- Deployed API URL: `https://web-service-fuhg.onrender.com`
+
+## 6) Authentication Summary
+
+JWT is used for authentication. Obtain a token via `POST /auth/login` (or `POST /auth/token` for Swagger OAuth2 form), then send:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+Protected endpoints:
+
 - `GET /auth/me`
-
-### Habit Categories
-
-- `GET /habits/categories`
-- `GET /habits/categories/{category_id}`
 - `POST /habits/categories`
 - `PUT /habits/categories/{category_id}`
 - `DELETE /habits/categories/{category_id}`
-
-### Habit Records
-
-- `GET /habits/records`
-- `GET /habits/records/{record_id}`
 - `POST /habits/records`
 - `PUT /habits/records/{record_id}`
 - `DELETE /habits/records/{record_id}`
 
-### Analytics
+Read endpoints remain open for coursework demonstration (e.g., listing categories/records and analytics summary).
 
-- `GET /analytics/summary`
+## 7) Example Usage (Login + Protected Call)
 
----
+```bash
+# 1) Login and copy access_token from response
+curl -X POST "http://127.0.0.1:8000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"demo123"}'
 
-## Authentication & Error Handling
+# 2) Call a protected endpoint with copied token
+curl -X POST "http://127.0.0.1:8000/habits/categories" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <PASTE_ACCESS_TOKEN_HERE>" \
+  -d '{"name":"Learning","description":"Reading and study habits"}'
+```
 
-- JWT login is provided through `POST /auth/login` (JSON) and `POST /auth/token` (OAuth2 password form for Swagger Authorize)
-- Protected endpoints require `Authorization: Bearer <token>`
-- Protected endpoints include `GET /auth/me` and all create/update/delete operations for categories and records
-- API returns consistent status-based error responses, including:
-  - `400` bad request/business rule violations (for example duplicate category name or invalid category reference)
-  - `401` unauthorized/invalid credentials/token
-  - `404` resource not found
-  - `422` validation errors (invalid request payload/path/query constraints)
-- Request validation constraints include:
-  - category/habit name length `1..100`
-  - `category_id > 0`
-  - `duration_minutes >= 0` when provided
-- Error payloads follow a consistent structure to simplify frontend handling and debugging
+## 8) Project Structure
 
----
+```text
+.
+├── app/
+│   ├── main.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── crud.py
+│   ├── auth.py
+│   └── routes/
+│       ├── auth.py
+│       ├── habits.py
+│       └── analytics.py
+├── data/
+├── scripts/
+├── tests/
+├── docs/
+└── frontend/
+```
 
-## Testing
+## 9) Testing
 
-Pytest tests cover key API behavior, including:
-
-- Authentication success and failure
-- Access control for protected endpoints
-- CRUD flows for categories and records
-- Duplicate category and invalid foreign-key scenarios
-- Not-found behavior (404)
-- Analytics summary endpoint response checks
-- Boundary validation scenarios (invalid payload values)
-- Unified error response format checks
-
-Run tests with:
+- Run tests:
 
 ```bash
 pytest
 ```
 
+- Current test scope covers auth, CRUD, validation, error handling, and analytics.
+- Latest project result: **22 tests passed**.
+
+## 9.1) Command-Line Testing for All Core Functions
+
+If you want to test all key features without frontend, use the CLI flow below.
+
+### A) Verify local DB state
+
+```bash
+python scripts/verify_db.py
+```
+
+### B) Run API behavior check script (auth + protected + error paths)
+
+```bash
+python scripts/run_api_checks.py
+```
+
+This script checks login success/failure, missing token behavior, duplicate category handling, invalid category reference, create/read flows, and not-found responses.
+
+### C) Run full automated test suite
+
+```bash
+pytest -q
+```
+
+### D) Manual endpoint checks with curl (recommended for report evidence)
+
+```bash
+# 1) health
+curl -s "http://127.0.0.1:8000/"
+
+# 2) login
+curl -s -X POST "http://127.0.0.1:8000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"demo123"}'
+
+# 3) list categories (public)
+curl -s "http://127.0.0.1:8000/habits/categories?limit=5"
+
+# 4) analytics (public)
+curl -s "http://127.0.0.1:8000/analytics/summary"
+```
+
+## 9.2) How to Use This Project (Recommended Order)
+
+1. Setup environment and start API.
+2. Open Swagger (`/docs`) and verify routes quickly.
+3. Choose one interaction mode:
+   - frontend demo (`frontend/`) for presentation;
+   - CLI (`curl` + scripts + pytest) for reproducible validation.
+4. Use JWT token for protected write operations (POST/PUT/DELETE).
+5. Use analytics endpoint to summarize habit completion and trends.
+
+## 10) Database
+
+- Local development/testing: SQLite (`habits.db`)
+- Production deployment: PostgreSQL via `DATABASE_URL`
+- Production safeguard: when environment is production, missing `DATABASE_URL` raises an error (no SQLite fallback)
+
+## 11) Seed Logic (No Duplicate Import)
+
+To avoid duplicate imports on redeploy, this project uses a seed tracking mechanism:
+
+- Seed marker stored in `seed_history`
+- Script `scripts/predeploy_seed_once.py` checks whether the named seed has already been applied
+- If already applied, seed import is skipped
+- If not applied, import runs and then records the seed marker
+
+## 12) Screenshots
+
+### Swagger UI (`/docs`)
+
+![Swagger UI Screenshot](docs/images/swagger-ui.png)
+
+### Analytics Endpoint Response (`/analytics/summary`)
+
+![Analytics Summary Screenshot](docs/images/analytics-summary.png)
+
 ---
 
-## API Documentation
+## Coursework Notes
 
-- Interactive docs (Swagger UI): `http://127.0.0.1:8000/docs`
-- ReDoc: `http://127.0.0.1:8000/redoc`
-- Final API documentation PDF for coursework submission: `docs/API_Documentation.pdf`
-
----
-
-## Deployment / Running Environment
-
-- Current setup targets local execution for coursework demonstration.
-- Backend runs on FastAPI + Uvicorn; frontend is served as static files via `python -m http.server`.
-- Default local addresses:
-  - Backend: `http://127.0.0.1:8000`
-  - Frontend: `http://127.0.0.1:5500/frontend/`
-
----
-
-## Coursework Submission Components
-
-- **Public repository**: this GitHub project (source code, scripts, tests, frontend)
-- **API documentation**: `docs/API_Documentation.pdf`
-- **Technical report**: `docs/Technical_Report.pdf`
-- **Presentation slides**: `docs/Presentation_Slides.pdf`
-
----
-
-## Notes / Limitations
-
-- Authentication is demo-level and intended for coursework demonstration
-- Analytics is intentionally concise (summary-level metrics, not advanced forecasting)
-- Dataset mapping uses explainable rule-based transformations
-- SQLite is used for local development and demonstration rather than production-scale deployment
-
----
-
-## Coursework Value
-
-This repository is designed to support both GitHub submission and oral presentation by emphasizing:
-
-- Clear architecture
-- Explainable data handling
-- Verifiable API behavior
-- Practical frontend-backend integration
+- This repository is prepared for university Web Services API submission.
+- API documentation and technical report are maintained under `docs/`.
+- The implementation, validation, and final decisions remain human-led, with GenAI used as an assistive tool.

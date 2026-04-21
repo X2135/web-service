@@ -1,3 +1,5 @@
+"""Quick local API smoke checks using FastAPI TestClient."""
+
 import json
 import sys
 from pathlib import Path
@@ -15,6 +17,7 @@ client = TestClient(app)
 
 
 def pretty(label: str, status_code: int, payload: dict | list | str) -> None:
+    # Standardized console output for easier result comparison.
     print(f"{label}: {status_code} | {json.dumps(payload, ensure_ascii=False)}")
 
 

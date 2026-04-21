@@ -1,3 +1,5 @@
+"""FastAPI application entrypoint and global error contract."""
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,6 +30,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 
 
 def _default_error_code(status_code: int) -> str:
+    # Map HTTP status codes to stable machine-readable error codes.
     mapping = {
         400: "BAD_REQUEST",
         401: "UNAUTHORIZED",
@@ -53,6 +56,7 @@ async def http_exception_handler(_: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_: Request, exc: RequestValidationError):
+    # Return only the first validation error to keep responses concise for clients.
     first_error = exc.errors()[0] if exc.errors() else {"msg": "Invalid request payload."}
     return JSONResponse(
         status_code=422,

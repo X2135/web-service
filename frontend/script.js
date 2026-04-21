@@ -1,3 +1,4 @@
+// Use local API when ?local=1 is present; otherwise use deployed backend.
 const API_BASE_URL = window.location.search.includes("local=1")
   ? "http://127.0.0.1:8000"
   : "https://web-service-1-iox1.onrender.com";
@@ -59,6 +60,7 @@ function showMessage(type, text) {
   }, 2800);
 }
 
+// Centralized request helper for status handling, auth header injection, and error normalization.
 async function apiRequest(path, { method = "GET", body = null, auth = false } = {}) {
   if (auth && !state.token) {
     throw Object.assign(new Error("Please authenticate first."), { status: 401 });
@@ -169,6 +171,7 @@ async function checkApiHealth() {
   }
 }
 
+// Demo auth flow: obtain JWT using fixed coursework demo credentials.
 async function loginWithDemoAccount() {
   const result = await apiRequest("/auth/login", {
     method: "POST",
@@ -181,6 +184,7 @@ async function loginWithDemoAccount() {
   setAuthStatus();
 }
 
+// Demo category flow used by dashboard buttons for repeatable presentation steps.
 async function createDemoCategory() {
   const created = await apiRequest("/habits/categories", {
     method: "POST",
@@ -194,6 +198,7 @@ async function createDemoCategory() {
   return created;
 }
 
+// Demo record flow used by dashboard buttons for repeatable presentation steps.
 async function createDemoRecord() {
   const created = await apiRequest("/habits/records", {
     method: "POST",

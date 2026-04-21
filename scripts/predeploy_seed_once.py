@@ -1,3 +1,5 @@
+"""Run one-time seed import guarded by `seed_history` markers."""
+
 from pathlib import Path
 import sys
 
@@ -11,6 +13,7 @@ from scripts.import_data import import_csv_data
 
 
 def main() -> int:
+    # Safe to run repeatedly: it exits early if the seed marker already exists.
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()

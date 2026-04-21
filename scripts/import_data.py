@@ -1,3 +1,5 @@
+"""CSV import utility that maps raw habit data into normalized DB records."""
+
 from pathlib import Path
 import sys
 from collections import Counter
@@ -28,6 +30,7 @@ CATEGORY_DEFINITIONS: dict[str, str] = {
 
 
 def import_csv_data(csv_path: Path = CSV_PATH) -> tuple[int, int, int]:
+    # Imports categories and records idempotently where possible.
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
@@ -152,6 +155,7 @@ def _build_habit_record(
 
 
 def _resolve_column_map(columns: Any) -> dict[str, str]:
+    # Resolve flexible CSV headers to canonical internal keys.
     normalized = {str(col).strip().lower(): str(col) for col in columns}
 
     def pick(required_key: str, candidates: list[str], optional: bool = False) -> str:
@@ -306,6 +310,7 @@ def _print_import_summary(
     category_distribution: Counter[str],
     durations: list[int],
 ) -> None:
+    # Prints compact import evidence used in deployment logs/reporting.
     average_duration = (sum(durations) / len(durations)) if durations else 0
 
     print("Import Summary:")

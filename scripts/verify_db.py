@@ -1,3 +1,5 @@
+"""Inspect local SQLite content for quick post-import verification."""
+
 from pathlib import Path
 import sys
 
@@ -15,6 +17,7 @@ DATABASE_URL = "sqlite:///./habits.db"
 
 
 def verify_database(sample_size: int = 5) -> None:
+    # Prints table counts and random sample rows for sanity checking.
     print(f"DB file exists: {DB_PATH.exists()} ({DB_PATH.resolve()})")
 
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})

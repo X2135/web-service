@@ -69,12 +69,71 @@ Open in browser:
 
 - `http://127.0.0.1:5500/frontend/?local=1` (connect to local FastAPI)
 - `http://127.0.0.1:5500/frontend/` (connect to deployed backend by default)
+- Deployed frontend URL: `https://web-service-2-8jgm.onrender.com/`
 
-### Frontend quick workflow
+### Frontend Layout Guide (What each area does)
 
-1. Click **Demo Login** (uses demo account).
-2. Click **Refresh Insights** to fetch `/analytics/summary`.
-3. Click create/delete demo category and record buttons to demonstrate protected CRUD.
+When you open the frontend page, the interface is divided into these functional blocks:
+
+1. **Header (top area)**
+  - **Service Status**: shows whether backend is reachable (`Online` / `Offline`).
+  - **Authentication**: shows login state (`Authenticated` / `Not authenticated`).
+  - **API Base URL**: shows which backend URL the page is currently calling.
+
+2. **Global Message Bar**
+  - Displays success/failure feedback after each action (for example login success, create failed, etc.).
+
+3. **Summary Cards**
+  - **Total Records**: total habit records in database.
+  - **Completed Records**: number of records with `completed=true`.
+  - **Completion Rate**: completion percentage from backend analytics.
+  - **Average Duration**: average `duration_minutes` from backend analytics.
+
+4. **Controlled Demo Actions Panel**
+  - Contains operation buttons for auth + CRUD demo flow.
+  - Intended for step-by-step live demonstration in presentation.
+
+5. **Analytics Evidence Panel**
+  - **Records by Category**: top category counts from `/analytics/summary`.
+  - **Daily Completion Trend**: recent daily `completed/total` trend rows.
+
+### Frontend Button Guide (What each click does)
+
+1. **Sign in (Demo Account)**
+  - Calls `POST /auth/login` with demo credentials.
+  - Saves JWT token in browser localStorage.
+  - Enables protected write operations.
+
+2. **Create Category**
+  - Calls `POST /habits/categories` with name `Demo Category`.
+  - Stores created id in frontend state and refreshes analytics.
+
+3. **Create Record**
+  - Calls `POST /habits/records` with habit name `Demo Habit`.
+  - Inserts one new record and refreshes analytics.
+
+4. **Delete Demo Category**
+  - Calls `DELETE /habits/categories/{id}` for latest `Demo Category`.
+  - If related records exist, delete demo record first.
+
+5. **Delete Demo Record**
+  - Calls `DELETE /habits/records/{id}` for latest `Demo Habit` record.
+  - Refreshes analytics after deletion.
+
+6. **Refresh Analytics**
+  - Calls `GET /analytics/summary` only.
+  - Re-renders all summary cards and insight lists.
+
+### Frontend quick workflow (recommended demo order)
+
+1. Click **Sign in (Demo Account)**.
+2. Click **Create Category**.
+3. Click **Create Record**.
+4. Click **Refresh Analytics** and observe card/list updates.
+5. Click **Delete Demo Record**.
+6. Click **Delete Demo Category**.
+
+Expected result: each action returns a success message in the message bar and keeps Service Status as `Online`.
 
 ## 4) API Documentation
 
@@ -189,11 +248,15 @@ pytest
 
 If you want to test all key features without frontend, use the CLI flow below.
 
-### A) Verify local DB state
+### A) Verify local DB state (table existence + counts)
 
 ```bash
 python scripts/verify_db.py
 ```
+
+What it does:
+- Checks local database connectivity and table/data status.
+- Quickly confirms whether your local environment is ready for API run/tests.
 
 ### B) Run API behavior check script (auth + protected + error paths)
 
@@ -209,7 +272,13 @@ This script checks login success/failure, missing token behavior, duplicate cate
 pytest -q
 ```
 
+What it does:
+- Runs all automated API tests under `tests/`.
+- Verifies auth, CRUD behavior, validation boundaries, error handling, and analytics contract.
+
 ### D) Manual endpoint checks with curl (recommended for report evidence)
+
+Run API locally first (`python -m uvicorn app.main:app --reload`), then execute:
 
 ```bash
 # 1) health
@@ -227,7 +296,39 @@ curl -s "http://127.0.0.1:8000/habits/categories?limit=5"
 curl -s "http://127.0.0.1:8000/analytics/summary"
 ```
 
-### E) Deployed endpoint quick checks
+What each command validates:
+- **health**: service process is running and reachable.
+- **login**: credential flow and JWT issuance are working.
+- **list categories**: public read endpoint returns JSON list.
+- **analytics**: aggregation endpoint responds correctly.
+
+### E) Manual protected CRUD test (token + write operations)
+
+```bash
+# 1) login and capture token
+TOKEN=$(curl -s -X POST "http://127.0.0.1:8000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"demo123"}' | python -c 'import sys, json; print(json.load(sys.stdin)["access_token"])')
+
+# 2) create category (protected)
+curl -s -X POST "http://127.0.0.1:8000/habits/categories" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"name":"CLI Demo Category","description":"created from CLI"}'
+
+# 3) create record (protected)
+curl -s -X POST "http://127.0.0.1:8000/habits/records" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"record_date":"2024-06-10","habit_name":"CLI Demo Habit","category_id":1,"completed":true,"duration_minutes":25,"notes":"cli test"}'
+```
+
+What this block validates:
+- Bearer token can be parsed and reused.
+- Protected write endpoints enforce auth and accept valid payloads.
+- New writes affect persisted data.
+
+### F) Deployed endpoint quick checks (backend)
 
 ```bash
 BASE="https://web-service-1-iox1.onrender.com"
@@ -236,6 +337,23 @@ curl -s "$BASE/"
 curl -s "$BASE/habits/categories?skip=0&limit=50"
 curl -s "$BASE/analytics/summary"
 ```
+
+What it does:
+- Confirms deployed backend health, public reads, and analytics output.
+
+### G) Deployed frontend checks
+
+Frontend URL:
+
+```text
+https://web-service-2-8jgm.onrender.com/
+```
+
+Checklist:
+- Page loads without 404/blank screen.
+- Header status shows backend reachable.
+- Demo login succeeds and auth status turns to `Authenticated`.
+- Create/refresh/delete actions return success messages and update analytics cards/lists.
 
 ## 9.2) How to Use This Project (Recommended Order)
 

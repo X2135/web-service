@@ -1,3 +1,5 @@
+"""CRUD endpoints for habit categories and daily habit records."""
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,7 @@ router = APIRouter()
 
 @router.get("/categories", response_model=list[schemas.HabitCategory])
 def list_categories(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+    # Public read endpoint to browse categories.
     return crud.get_categories(db=db, skip=skip, limit=limit)
 
 
@@ -34,6 +37,7 @@ def create_category(
     db: Session = Depends(get_db),
     _: str = Depends(get_current_user),
 ):
+    # Protected write endpoint: requires JWT.
     try:
         return crud.create_category(db=db, category=category)
     except ValueError as exc:
@@ -72,6 +76,7 @@ def delete_category(
     db: Session = Depends(get_db),
     _: str = Depends(get_current_user),
 ):
+    # Return 204 on success and keep response body empty by design.
     deleted = crud.delete_category(db=db, category_id=category_id)
     if not deleted:
         raise HTTPException(
@@ -83,6 +88,7 @@ def delete_category(
 
 @router.get("/records", response_model=list[schemas.HabitRecord])
 def list_habit_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Public read endpoint to list records for analytics and inspection.
     return crud.get_habit_records(db=db, skip=skip, limit=limit)
 
 
@@ -107,6 +113,7 @@ def create_habit_record(
     db: Session = Depends(get_db),
     _: str = Depends(get_current_user),
 ):
+    # Protected write endpoint for adding a habit record.
     try:
         return crud.create_habit_record(db=db, record=record)
     except LookupError as exc:
@@ -145,6 +152,7 @@ def delete_habit_record(
     db: Session = Depends(get_db),
     _: str = Depends(get_current_user),
 ):
+    # Return 204 on success and keep response body empty by design.
     deleted = crud.delete_habit_record(db=db, record_id=record_id)
     if not deleted:
         raise HTTPException(

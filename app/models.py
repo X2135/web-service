@@ -1,3 +1,5 @@
+"""SQLAlchemy ORM models for categories, records, and seed history."""
+
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import relationship
 
@@ -5,6 +7,7 @@ from app.database import Base
 
 
 class HabitCategory(Base):
+    # Lookup table for habit categories.
     __tablename__ = "habit_categories"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -15,6 +18,7 @@ class HabitCategory(Base):
 
 
 class HabitRecord(Base):
+    # Daily habit tracking records linked to a category.
     __tablename__ = "habit_records"
     __table_args__ = (
         UniqueConstraint("record_date", "habit_name", "category_id", name="uq_habit_record_date_name_category"),
@@ -32,6 +36,7 @@ class HabitRecord(Base):
 
 
 class SeedHistory(Base):
+    # Tracks one-time seed executions to avoid duplicate imports.
     __tablename__ = "seed_history"
 
     id = Column(Integer, primary_key=True, index=True)

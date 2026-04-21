@@ -9,7 +9,8 @@ Database configuration is environment-driven: SQLite is used for local developme
 ## 2. Base URL
 
 - Local: `http://127.0.0.1:8000`
-- Deployed demo: `https://web-service-fuhg.onrender.com`
+- Deployed backend: `https://web-service-1-iox1.onrender.com`
+- Deployed frontend dashboard: `https://web-service-2-8jgm.onrender.com/`
 
 ## 3. Authentication
 

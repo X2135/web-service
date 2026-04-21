@@ -1,3 +1,5 @@
+"""End-to-end API tests for auth, CRUD, analytics, and error contracts."""
+
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -15,6 +17,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 
 def override_get_db():
+    # Route all DB dependencies to an isolated SQLite test database.
     db = TestingSessionLocal()
     try:
         yield db
@@ -27,6 +30,7 @@ client = TestClient(app)
 
 
 def setup_function() -> None:
+    # Reset schema before each test to keep cases independent.
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
@@ -37,6 +41,7 @@ def teardown_module() -> None:
 
 
 def login_and_get_token() -> str:
+    # Helper for protected endpoint tests.
     response = client.post("/auth/login", json={"username": "demo", "password": "demo123"})
     assert response.status_code == 200
     return response.json()["access_token"]
@@ -58,6 +63,7 @@ def create_category(name: str = "Learning", description: str = "Reading habits")
 
 
 def create_record(category_id: int) -> dict:
+    # Creates a canonical record used by multiple tests.
     response = client.post(
         "/habits/records",
         json={

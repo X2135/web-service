@@ -1,3 +1,5 @@
+"""Database CRUD operations and analytics aggregation queries."""
+
 from sqlalchemy import case, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -14,6 +16,7 @@ def get_category_by_id(db: Session, category_id: int):
 
 
 def create_category(db: Session, category: schemas.HabitCategoryCreate):
+    # Validate uniqueness at application layer for a clear client-facing error.
     existing = db.query(models.HabitCategory).filter(models.HabitCategory.name == category.name).first()
     if existing:
         raise ValueError("Category name already exists.")
@@ -35,6 +38,7 @@ def update_category(db: Session, category_id: int, category: schemas.HabitCatego
         return None
 
     update_data = category.model_dump(exclude_unset=True)
+    # If name is updated, enforce uniqueness before commit.
     if "name" in update_data:
         existing = db.query(models.HabitCategory).filter(models.HabitCategory.name == update_data["name"]).first()
         if existing and existing.id != category_id:
@@ -71,6 +75,7 @@ def get_habit_record_by_id(db: Session, record_id: int):
 
 
 def create_habit_record(db: Session, record: schemas.HabitRecordCreate):
+    # Reject orphan records that reference a missing category.
     category = get_category_by_id(db=db, category_id=record.category_id)
     if not category:
         raise LookupError("Category does not exist.")
@@ -88,6 +93,7 @@ def update_habit_record(db: Session, record_id: int, record: schemas.HabitRecord
         return None
 
     update_data = record.model_dump(exclude_unset=True)
+    # Validate category changes before applying partial updates.
     if "category_id" in update_data:
         category = get_category_by_id(db=db, category_id=update_data["category_id"])
         if not category:
@@ -178,6 +184,7 @@ def get_analytics_summary(db: Session):
 
 
 def check_seed_applied(db: Session, seed_name: str) -> bool:
+    # Seed history avoids repeated imports across deployments.
     return db.query(models.SeedHistory).filter(models.SeedHistory.seed_name == seed_name).first() is not None
 
 

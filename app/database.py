@@ -1,3 +1,5 @@
+"""Database engine/session setup with environment-aware URL normalization."""
+
 import os
 
 from sqlalchemy import create_engine
@@ -40,6 +42,7 @@ Base = declarative_base()
 
 
 def get_db():
+    # FastAPI dependency that provides a scoped SQLAlchemy session per request.
     db = SessionLocal()
     try:
         yield db

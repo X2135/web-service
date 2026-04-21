@@ -1,3 +1,5 @@
+"""Pydantic request/response schemas used by API routes."""
+
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -52,6 +54,7 @@ class HabitRecord(HabitRecordBase):
 
 
 class LoginRequest(BaseModel):
+    # Demo credential payload accepted by `/auth/login`.
     username: str = Field(min_length=1)
     password: str = Field(min_length=1)
 
@@ -83,6 +86,7 @@ class DailyTrendPoint(BaseModel):
 
 
 class AnalyticsSummary(BaseModel):
+    # Aggregated KPIs consumed by dashboard summary and insight sections.
     total_records: int
     completed_records: int
     completion_rate: float

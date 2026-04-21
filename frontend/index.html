@@ -10,21 +10,22 @@
     <div class="dashboard">
       <header class="hero">
         <div class="hero-left">
-          <h1>Habit & Productivity Analytics Dashboard</h1>
-          <p class="subtitle">Presentation view of API value and business outcomes</p>
+          <p class="eyebrow">Coursework Demonstration Dashboard</p>
+          <h1>Habit & Productivity Analytics</h1>
+          <p class="subtitle">Real-time API monitoring, controlled demo actions, and analytics evidence</p>
         </div>
 
         <div class="hero-right">
           <div class="status-line">
-            <span class="label">API Status</span>
+            <span class="label">Service Status</span>
             <span id="apiStatus" class="pill warning">Checking...</span>
           </div>
           <div class="status-line">
-            <span class="label">Login Status</span>
+            <span class="label">Authentication</span>
             <span id="authStatus" class="pill neutral">Not logged in</span>
           </div>
           <div class="status-line">
-            <span class="label">Base URL</span>
+            <span class="label">API Base URL</span>
             <span id="backendUrl" class="mono">http://127.0.0.1:8000</span>
           </div>
         </div>
@@ -53,40 +54,53 @@
 
       <main class="main-panels">
         <section class="card demo-flow">
-          <h2>Demo Flow</h2>
-          <p class="helper-text">Run in order for a full demo in under 30 seconds.</p>
+          <h2>Controlled Demo Actions</h2>
+          <p class="helper-text">Run actions in sequence for a complete API demonstration.</p>
           <div class="demo-actions">
             <div class="demo-action-item">
-              <button type="button" id="demoLoginBtn">Login</button>
-              <p>Use demo account to unlock protected write APIs.</p>
+              <button type="button" id="demoLoginBtn">1) Sign in (Demo Account)</button>
+              <p>Authenticate to access protected write operations.</p>
             </div>
             <div class="demo-action-item">
-              <button type="button" id="createDemoCategoryBtn">Create Demo Category</button>
-              <p>Insert one standard category for presentation flow.</p>
+              <button type="button" id="createDemoCategoryBtn">2) Create Category</button>
+              <p>Create a sample category for the walkthrough.</p>
             </div>
             <div class="demo-action-item">
-              <button type="button" id="createDemoRecordBtn">Create Demo Record</button>
-              <p>Insert one sample record to drive insight updates.</p>
+              <button type="button" id="createDemoRecordBtn">3) Create Record</button>
+              <p>Insert one record to update metrics and trends.</p>
             </div>
             <div class="demo-action-item">
-              <button type="button" id="refreshInsightsBtn" class="secondary">Refresh Insights</button>
-              <p>Reload backend analytics from <code>/analytics/summary</code>.</p>
+              <button type="button" id="deleteDemoCategoryBtn" class="danger">4) Delete Demo Category</button>
+              <p>Remove the latest <code>Demo Category</code> entry (delete record first).</p>
+            </div>
+            <div class="demo-action-item">
+              <button type="button" id="deleteDemoRecordBtn" class="danger">5) Delete Demo Record</button>
+              <p>Remove the latest <code>Demo Habit</code> record from the database.</p>
+            </div>
+            <div class="demo-action-item">
+              <button type="button" id="refreshInsightsBtn" class="secondary">6) Refresh Analytics</button>
+              <p>Fetch latest summary from <code>/analytics/summary</code>.</p>
             </div>
           </div>
           <p id="loginStatus" class="status-text">Not logged in</p>
         </section>
 
         <section class="card insights-panel">
-          <h2>Business Insights (from API)</h2>
-          <p class="helper-text">All values come from backend <code>/analytics/summary</code>.</p>
+          <h2>Analytics Evidence</h2>
+          <p class="helper-text">All values are computed by backend aggregation logic.</p>
 
-          <h3>Records Per Category</h3>
+          <h3>Records by Category</h3>
           <div id="analyticsCategoryList" class="compact-list"></div>
 
-          <h3>Daily Trend</h3>
+          <h3>Daily Completion Trend</h3>
           <div id="analyticsTrendList" class="compact-list"></div>
         </section>
       </main>
+
+      <footer class="dashboard-footer">
+        <span>Habit & Productivity Analytics API</span>
+        <span>Coursework Presentation View</span>
+      </footer>
     </div>
 
     <script src="script.js"></script>

@@ -8,6 +8,8 @@ const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   analytics: null,
   username: "demo",
+  lastDemoCategoryId: null,
+  lastDemoRecordId: null,
 };
 
 const elements = {
@@ -29,6 +31,8 @@ const elements = {
   createDemoCategoryBtn: document.getElementById("createDemoCategoryBtn"),
   createDemoRecordBtn: document.getElementById("createDemoRecordBtn"),
   refreshInsightsBtn: document.getElementById("refreshInsightsBtn"),
+  deleteDemoRecordBtn: document.getElementById("deleteDemoRecordBtn"),
+  deleteDemoCategoryBtn: document.getElementById("deleteDemoCategoryBtn"),
 };
 
 elements.backendUrl.textContent = API_BASE_URL;
@@ -41,10 +45,10 @@ function setApiStatus(type, text) {
 function setAuthStatus() {
   const loggedIn = Boolean(state.token);
   elements.authStatus.className = `pill ${loggedIn ? "success" : "neutral"}`;
-  elements.authStatus.textContent = loggedIn ? "Logged in" : "Not logged in";
+  elements.authStatus.textContent = loggedIn ? "Authenticated" : "Not authenticated";
   elements.loginStatus.textContent = loggedIn
-    ? `Authenticated session active (${state.username})`
-    : "Not logged in";
+    ? `Session active: ${state.username}`
+    : "No active session";
 }
 
 function showMessage(type, text) {
@@ -57,7 +61,7 @@ function showMessage(type, text) {
 
 async function apiRequest(path, { method = "GET", body = null, auth = false } = {}) {
   if (auth && !state.token) {
-    throw Object.assign(new Error("Please login first."), { status: 401 });
+    throw Object.assign(new Error("Please authenticate first."), { status: 401 });
   }
 
   const headers = { "Content-Type": "application/json" };
@@ -92,7 +96,7 @@ async function apiRequest(path, { method = "GET", body = null, auth = false } = 
   } catch (error) {
     if (!error.status) {
       setApiStatus("error", "Offline");
-      throw new Error("API is offline or unreachable.");
+      throw new Error("Service is offline or unreachable.");
     }
     throw error;
   }
@@ -178,7 +182,7 @@ async function loginWithDemoAccount() {
 }
 
 async function createDemoCategory() {
-  await apiRequest("/habits/categories", {
+  const created = await apiRequest("/habits/categories", {
     method: "POST",
     body: {
       name: "Demo Category",
@@ -186,10 +190,12 @@ async function createDemoCategory() {
     },
     auth: true,
   });
+  state.lastDemoCategoryId = created?.id ?? null;
+  return created;
 }
 
 async function createDemoRecord() {
-  await apiRequest("/habits/records", {
+  const created = await apiRequest("/habits/records", {
     method: "POST",
     body: {
       record_date: new Date().toISOString().slice(0, 10),
@@ -200,41 +206,111 @@ async function createDemoRecord() {
     },
     auth: true,
   });
+  state.lastDemoRecordId = created?.id ?? null;
+  return created;
+}
+
+async function resolveLatestDemoRecordId() {
+  const records = await apiRequest("/habits/records?limit=200");
+  const demoRecords = (Array.isArray(records) ? records : []).filter((item) => item.habit_name === "Demo Habit");
+  if (!demoRecords.length) {
+    return null;
+  }
+  return demoRecords.reduce((maxId, item) => (item.id > maxId ? item.id : maxId), demoRecords[0].id);
+}
+
+async function resolveLatestDemoCategoryId() {
+  const categories = await apiRequest("/habits/categories?limit=200");
+  const demoCategories = (Array.isArray(categories) ? categories : []).filter(
+    (item) => item.name === "Demo Category"
+  );
+  if (!demoCategories.length) {
+    return null;
+  }
+  return demoCategories.reduce((maxId, item) => (item.id > maxId ? item.id : maxId), demoCategories[0].id);
+}
+
+async function deleteDemoRecord() {
+  const recordId = state.lastDemoRecordId ?? (await resolveLatestDemoRecordId());
+  if (!recordId) {
+    throw new Error("No Demo Habit record found.");
+  }
+
+  await apiRequest(`/habits/records/${recordId}`, {
+    method: "DELETE",
+    auth: true,
+  });
+  state.lastDemoRecordId = null;
+}
+
+async function deleteDemoCategory() {
+  const categoryId = state.lastDemoCategoryId ?? (await resolveLatestDemoCategoryId());
+  if (!categoryId) {
+    throw new Error("No Demo Category found.");
+  }
+
+  await apiRequest(`/habits/categories/${categoryId}`, {
+    method: "DELETE",
+    auth: true,
+  });
+  state.lastDemoCategoryId = null;
 }
 
 elements.demoLoginBtn.addEventListener("click", async () => {
   try {
     await loginWithDemoAccount();
-    showMessage("success", "Login successful.");
+    showMessage("success", "Authentication successful.");
   } catch (error) {
-    showMessage("error", `Login failed: ${error.message}`);
+    showMessage("error", `Authentication failed: ${error.message}`);
   }
 });
 
 elements.createDemoCategoryBtn.addEventListener("click", async () => {
   try {
     await createDemoCategory();
-    showMessage("success", "Demo category created.");
+    await refreshInsights();
+    showMessage("success", "Category created and analytics refreshed.");
   } catch (error) {
-    showMessage("error", `Create demo category failed: ${error.message}`);
+    showMessage("error", `Category creation failed: ${error.message}`);
   }
 });
 
 elements.createDemoRecordBtn.addEventListener("click", async () => {
   try {
     await createDemoRecord();
-    showMessage("success", "Demo record created.");
+    await refreshInsights();
+    showMessage("success", "Record created and analytics refreshed.");
   } catch (error) {
-    showMessage("error", `Create demo record failed: ${error.message}`);
+    showMessage("error", `Record creation failed: ${error.message}`);
   }
 });
 
 elements.refreshInsightsBtn.addEventListener("click", async () => {
   try {
     await refreshInsights();
-    showMessage("success", "Insights refreshed.");
+    showMessage("success", "Analytics refreshed.");
   } catch (error) {
-    showMessage("error", `Refresh insights failed: ${error.message}`);
+    showMessage("error", `Analytics refresh failed: ${error.message}`);
+  }
+});
+
+elements.deleteDemoRecordBtn.addEventListener("click", async () => {
+  try {
+    await deleteDemoRecord();
+    await refreshInsights();
+    showMessage("success", "Demo record deleted and analytics refreshed.");
+  } catch (error) {
+    showMessage("error", `Record deletion failed: ${error.message}`);
+  }
+});
+
+elements.deleteDemoCategoryBtn.addEventListener("click", async () => {
+  try {
+    await deleteDemoCategory();
+    await refreshInsights();
+    showMessage("success", "Demo category deleted and analytics refreshed.");
+  } catch (error) {
+    showMessage("error", `Category deletion failed: ${error.message}`);
   }
 });
 

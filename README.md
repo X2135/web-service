@@ -150,7 +150,7 @@ Then open:
 ### 7) Run tests
 
 ```bash
-pytest -q
+pytest
 ```
 
 ---
@@ -223,7 +223,7 @@ Pytest tests cover key API behavior, including:
 Run tests with:
 
 ```bash
-pytest -q
+pytest
 ```
 
 ---

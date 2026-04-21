@@ -1,6 +1,6 @@
 const API_BASE_URL = window.location.search.includes("local=1")
   ? "http://127.0.0.1:8000"
-  : "https://web-service-fuhg.onrender.com";
+  : "https://web-service-1-iox1.onrender.com";
 
 const TOKEN_KEY = "habit_api_token";
 

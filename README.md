@@ -1,6 +1,6 @@
 # Habit & Productivity Analytics API
 
-A coursework Web Services API project built with FastAPI. The service provides full CRUD operations for habit categories and habit records, a dedicated analytics endpoint, and JWT-based authentication for protected operations.
+A coursework Web Services API project built with FastAPI. The service provides CRUD operations for habit categories and habit records, an analytics summary endpoint, and JWT-based authentication for protected write operations.
 
 ## 1) Project Overview
 
@@ -76,14 +76,46 @@ Open in browser:
 2. Click **Refresh Insights** to fetch `/analytics/summary`.
 3. Click create/delete demo category and record buttons to demonstrate protected CRUD.
 
-## 4) API Documentation Link
+## 4) API Documentation
 
-- https://github.com/X2135/web-service/blob/main/docs/API_Documentation.pdf
+- Local file: `docs/API_Documentation.pdf`
+- Repository link: `https://github.com/X2135/web-service/blob/main/docs/API_Documentation.pdf`
 
 
 ## 5) Deployment Information
 
-- Deployed API URL: `https://web-service-fuhg.onrender.com`
+- Current deployed API URL: `https://web-service-1-iox1.onrender.com`
+- Swagger UI: `https://web-service-1-iox1.onrender.com/docs`
+- ReDoc: `https://web-service-1-iox1.onrender.com/redoc`
+
+### 5.1) Render Configuration (Used in This Project)
+
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Required environment variables:
+  - `APP_ENV=production`
+  - `DATABASE_URL=<Render Internal Database URL>`
+  - `SECRET_KEY=<long-random-string>`
+  - `ALGORITHM=HS256`
+  - `ACCESS_TOKEN_EXPIRE_MINUTES=60`
+
+### 5.2) Seed Behavior on Render (Important)
+
+This project does **not** auto-seed during app startup. Initial import is handled by `scripts/predeploy_seed_once.py`.
+
+- If your Render plan supports Pre-Deploy Command, run:
+  - `python scripts/predeploy_seed_once.py`
+- If Pre-Deploy is unavailable on free plan, run seed once from local terminal using Render **External Database URL**:
+
+```bash
+cd "/Users/lcx/Desktop/web service"
+export APP_ENV=production
+export DATABASE_URL='<Render External Database URL>'
+python scripts/predeploy_seed_once.py
+unset DATABASE_URL APP_ENV
+```
+
+The script is idempotent via `seed_history` and avoids duplicate imports.
 
 ## 6) Authentication Summary
 
@@ -195,6 +227,16 @@ curl -s "http://127.0.0.1:8000/habits/categories?limit=5"
 curl -s "http://127.0.0.1:8000/analytics/summary"
 ```
 
+### E) Deployed endpoint quick checks
+
+```bash
+BASE="https://web-service-1-iox1.onrender.com"
+
+curl -s "$BASE/"
+curl -s "$BASE/habits/categories?skip=0&limit=50"
+curl -s "$BASE/analytics/summary"
+```
+
 ## 9.2) How to Use This Project (Recommended Order)
 
 1. Setup environment and start API.
@@ -229,6 +271,12 @@ To avoid duplicate imports on redeploy, this project uses a seed tracking mechan
 ### Analytics Endpoint Response (`/analytics/summary`)
 
 ![Analytics Summary Screenshot](docs/images/analytics-summary.png)
+
+### GenAI Conversation Evidence
+
+![ChatGPT conversation on API CRUD route design](docs/images/image%20for%20chatgpt.png)
+
+![ChatGPT conversation on reseeding and persistence strategy](docs/images/image%20for%20chatgpt2.png)
 
 ---
 
